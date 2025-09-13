@@ -2,7 +2,6 @@ package com.kaan.barcode.service.ServiceImpl;
 
 import com.kaan.barcode.BarcodeDto.RequestBarcode;
 import com.kaan.barcode.BarcodeDto.ResponceBarcode;
-import com.kaan.barcode.barcodeMapper.BarcodeToRequest;
 import com.kaan.barcode.barcodeMapper.BarcodeToResponce;
 import com.kaan.barcode.barcodeTypes;
 import com.kaan.barcode.entity.Barcode;
@@ -12,6 +11,7 @@ import com.kaan.barcode.service.IBarcodeService;
 import com.kaan.category.exeption.BaseException;
 import com.kaan.category.exeption.ErrorMessage;
 import com.kaan.category.exeption.messageType;
+import com.kaan.product.ProductResponce.BarcodeResponce;
 import com.kaan.product.ProductResponce.ProductResponce;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kaan.barcode.barcodeMapper.requestToBarcode;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -71,7 +68,7 @@ public class BarcodeServiceImpl implements IBarcodeService {
         String code = String.format("%09d", number);
         barcode.setCode(code);
         barcodeRepository.save(barcode);
-        new BarcodeToResponce(barcode,responceBarcode);
+        new BarcodeToResponce(barcode, responceBarcode);
         return responceBarcode;
     }
     @Override
@@ -121,7 +118,7 @@ public class BarcodeServiceImpl implements IBarcodeService {
             barcode = new Barcode();}
         new requestToBarcode(request,barcode);
         barcodeRepository.save(barcode);
-        new BarcodeToResponce(barcode,responceBarcode);
+        new BarcodeToResponce(barcode, responceBarcode);
         return responceBarcode;
     }
     @Override
@@ -158,21 +155,25 @@ public class BarcodeServiceImpl implements IBarcodeService {
         return responceBarcode;
     }
     @Override
-    public Barcode getBarcodeById(Long id) {
+    public ResponceBarcode getBarcodeById(Long id) {
         Optional<Barcode> barcodeOptional = barcodeRepository.findById(id);
         if (barcodeOptional.isPresent()) {
             Barcode barcode = barcodeOptional.get();
             ResponceBarcode responceBarcode = new ResponceBarcode();
             new BarcodeToResponce (barcode, responceBarcode);
-            return barcode;
+            return responceBarcode;
         }
         return null;}
     @Override
-    public Barcode getBarcodeByCode(String Code) {
+    public ResponceBarcode getBarcodeByCode(String Code) {
         List<Barcode> barcodeOptional = barcodeRepository.findAll();
+        List<ResponceBarcode> responceBarcodeList = new ArrayList<>();
         for (Barcode barcode : barcodeOptional) {
             if (barcode.getCode().equals(Code)) {
-                return barcode;}}
+                ResponceBarcode responceBarcode = new ResponceBarcode();
+                new BarcodeToResponce (barcode, responceBarcode);
+                responceBarcodeList.add(responceBarcode);
+                return responceBarcode;}}
         return null;}
     @Override
     public boolean deleteBarcodeById(Long id) {
@@ -183,24 +184,41 @@ public class BarcodeServiceImpl implements IBarcodeService {
         }
         return false;
     }
-    public Barcode findByProductId(Long productId) {
-        return barcodeRepository.findByProductId(productId).orElse(null);
+    public BarcodeResponce findByProductId(Long productId) {
+        Optional<Barcode> barcodeOptional = barcodeRepository.findByProductId(productId);
+        if (barcodeOptional.isPresent()) {
+            Barcode barcode = barcodeOptional.get();
+            BarcodeResponce responceBarcode = new BarcodeResponce();
+            responceBarcode.setCode(barcode.getCode());
+            responceBarcode.setType(barcode.getType());
+            responceBarcode.setExtraBarcode(barcode.getExtraBarcode());
+            responceBarcode.setId(barcode.getId());
+            return responceBarcode;
+        }
+        return null;
     }
     @Override
-    public List<Barcode> getAllBarcodes() {
-        return barcodeRepository.findAll();
+    public List<ResponceBarcode> getAllBarcodes() {
+        List<Barcode> barcodeOptional = barcodeRepository.findAll();
+        List<ResponceBarcode> responceBarcodeList = new ArrayList<>();
+        for (Barcode barcode : barcodeOptional) {
+            ResponceBarcode responceBarcode = new ResponceBarcode();
+            new BarcodeToResponce (barcode, responceBarcode);
+            responceBarcodeList.add(responceBarcode);
+        }
+        return responceBarcodeList;
     }
     @Override
-    public RequestBarcode saveBarcode(@RequestBody RequestBarcode barcodeRequest) {
+    public ResponceBarcode saveBarcode(@RequestBody RequestBarcode barcodeRequest) {
 
         Barcode barcode = new Barcode();
         new requestToBarcode(barcodeRequest,barcode);
         barcodeRepository.save(barcode);
 
-        RequestBarcode requestBarcode = new RequestBarcode();
-        new BarcodeToRequest(barcode,requestBarcode);
+        ResponceBarcode responceBarcode = new ResponceBarcode();
+        new BarcodeToResponce (barcode, responceBarcode);
 
-        return requestBarcode;
+        return responceBarcode;
     }
 }
 

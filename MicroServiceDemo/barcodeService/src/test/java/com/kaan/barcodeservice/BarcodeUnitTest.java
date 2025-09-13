@@ -8,7 +8,7 @@ import com.kaan.barcode.feign.productInterface;
 import com.kaan.barcode.repository.BarcodeRepository;
 import com.kaan.barcode.service.ServiceImpl.BarcodeServiceImpl;
 import static org.mockito.ArgumentMatchers.any;
-import com.kaan.product.Entity.Product;
+
 import com.kaan.product.Enums;
 import com.kaan.product.ProductResponce.ProductResponce;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -74,11 +73,10 @@ public class BarcodeUnitTest {
         barcode.setExtraBarcode(null);
         barcode.setType(barcodeTypes.valueOf("NORMAL"));
         when(barcodeRepository.findById(1L)).thenReturn(Optional.of(barcode));
-        Barcode barcode1 = barcodeService.getBarcodeById(1L);
+        ResponceBarcode barcode1 = barcodeService.getBarcodeById(1L);
 
         assertNotNull(barcode1,"barcode not found");
         assertEquals("testCode",barcode1.getCode(),"barcode code not found");
-        assertEquals(1,barcode1.getProductId(),"barcode product id not found");
         assertEquals(barcodeTypes.valueOf("NORMAL"),barcode1.getType(),"barcode extra code not found");
     }
     @Test
@@ -86,7 +84,7 @@ public class BarcodeUnitTest {
         List<Barcode> barcode = Collections.singletonList(new Barcode(1L, "testCode", null, barcodeTypes.NORMAL, 1L));
         when(barcodeRepository.findAll()).thenReturn(barcode);
 
-        List<Barcode> barcodeList = barcodeService.getAllBarcodes();
+        List<ResponceBarcode> barcodeList = barcodeService.getAllBarcodes();
         assertNotNull(barcodeList,"barcode not found");
         assertEquals(1,barcodeList.size(),"barcode size not found");
         assertEquals("testCode",barcodeList.get(0).getCode(),"barcode code not found");
@@ -108,10 +106,9 @@ public class BarcodeUnitTest {
 
         when(barcodeRepository.findAll()).thenReturn(barcodeList);
 
-        Barcode barcode1 = barcodeService.getBarcodeByCode("testCode");
+        ResponceBarcode barcode1 = barcodeService.getBarcodeByCode("testCode");
         assertNotNull(barcode1,"barcode not found");
         assertEquals("testCode",barcode1.getCode(),"barcode code not found");
-        assertEquals(1,barcode1.getProductId(),"barcode product id not found");
     }
     @Test
     @Disabled

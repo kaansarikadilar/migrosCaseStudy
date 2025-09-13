@@ -1,10 +1,7 @@
 package com.kaan.product.Service;
 
-import com.kaan.barcode.BarcodeDto.RequestBarcode;
-import com.kaan.barcode.entity.Barcode;
 import com.kaan.product.ProductResponce.ProductRequest;
 import com.kaan.product.ProductResponce.ProductResponce;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -20,5 +17,5 @@ public interface IProductService {
 
     public String deleteProductById(@PathVariable(name = "id") Long id);
 
-    public ProductResponce updateProductById(@PathVariable(name= "id")Long id,@RequestBody ProductRequest productRequest);
+    public ProductResponce updateProductById(@PathVariable(name= "id")Long id, @RequestBody ProductRequest productRequest);
 }

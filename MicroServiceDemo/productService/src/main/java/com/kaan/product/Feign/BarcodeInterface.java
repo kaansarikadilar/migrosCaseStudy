@@ -1,8 +1,8 @@
 package com.kaan.product.Feign;
 
-import com.kaan.barcode.BarcodeDto.RequestBarcode;
 import com.kaan.barcode.BarcodeDto.ResponceBarcode;
-import com.kaan.barcode.entity.Barcode;
+import com.kaan.barcode.BarcodeDto.RequestBarcode;
+import com.kaan.product.ProductResponce.BarcodeResponce;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,16 +15,16 @@ public interface BarcodeInterface {
     RequestBarcode generateBarcodeCode();
 
     @GetMapping(path = "/rest/api/controller/list")
-    List<Barcode> getAllBarcodes();
+    List<ResponceBarcode> getAllBarcodes();
 
     @GetMapping(path = "/rest/api/controller/generateCash")
     RequestBarcode generateCashCode();
 
     @GetMapping("/rest/api/controller/findByProduct/{productId}")
-    Barcode findByProductId(@PathVariable("productId") Long productId);
+    BarcodeResponce findByProductId(@PathVariable("productId") Long productId);
 
     @GetMapping(path = "/rest/api/controller/list/{id}")
-    Barcode getBarcodeById(@PathVariable(name = "id") Long id);
+    ResponceBarcode getBarcodeById(@PathVariable(name = "id") Long id);
 
     @DeleteMapping(path = "/rest/api/controller/delete/{id}")
     boolean deleteBarcodeById(@PathVariable(name = "id") Long id);
@@ -39,5 +39,5 @@ public interface BarcodeInterface {
     ResponceBarcode generateBarcode(@RequestBody RequestBarcode request);
 
     @PostMapping(path = "/rest/api/controller/update/{id}")
-    ResponceBarcode updateBarcode(@PathVariable(name = "id") Long id,@RequestBody RequestBarcode request);
+    ResponceBarcode updateBarcode(@PathVariable(name = "id") Long id, @RequestBody RequestBarcode request);
 }

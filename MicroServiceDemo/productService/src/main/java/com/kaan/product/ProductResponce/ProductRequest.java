@@ -25,8 +25,5 @@ public class ProductRequest {
     @Pattern(regexp = "^[a-zA-ZçÇğĞıİöÖşŞüÜ\\s]+$", message = "Characters Only !")
     private String brand;
 
-
     private Long categoryId;
-
-
 }

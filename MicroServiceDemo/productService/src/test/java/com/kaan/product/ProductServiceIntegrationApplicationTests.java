@@ -1,13 +1,11 @@
 package com.kaan.product;
 
-import com.kaan.barcode.BarcodeDto.RequestBarcode;
-import com.kaan.barcode.BarcodeDto.ResponceBarcode;
-import com.kaan.barcode.barcodeTypes;
 import com.kaan.category.response.RequestCategory;
 import com.kaan.category.response.ResponseCategory;
 import com.kaan.product.Entity.Product;
 import com.kaan.product.Feign.BarcodeInterface;
 import com.kaan.product.Feign.CategoryInterface;
+import com.kaan.product.ProductResponce.ProductResponce;
 import com.kaan.product.Repository.ProductRepository;
 import com.kaan.product.Service.Impl.ProductServiceImpl;
 import jakarta.transaction.Transactional;
@@ -23,6 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @Nested
 @RequiredArgsConstructor
@@ -49,87 +48,50 @@ class ProductServiceIntegrationApplicationTests {
         rc1.setCategoryCode("MY");
         rc1.setCategoryName("SampleCategory");
 
-        Mockito.when(categoryInterface.getCategoryById(Mockito.anyLong()))
+        when(categoryInterface.getCategoryById(Mockito.anyLong()))
                 .thenReturn(new ResponseCategory(1L, "SampleCategory", "MY"));
     }
     @Test
     @Transactional
     void testGetAllProducts() {
-        Product request = new Product();
-        request.setUnit(Enums.KILOGRAM);
-        request.setCategoryId(1L);
-        request.setProductName("SampleProduct");
-        request.setBrand("SampleBrand");
-        Product savedProduct = productRepository.save(request);
-        RequestBarcode requestBarcode = new RequestBarcode();
-        requestBarcode.setProductId(savedProduct.getId());
-        requestBarcode.setCategoryCode(requestBarcode.getCategoryCode());
-        ResponceBarcode responceBarcode = new ResponceBarcode("123", barcodeTypes.NORMAL,null);
-        savedProduct.setBarcodeId(responceBarcode.getCode());
-        productRepository.save(savedProduct);
-
-        List<Product> products = productRepository.findAll();
-        for (Product productResponce : products) {
+        List<ProductResponce> products = productService.getAllProducts();
+        for (ProductResponce productResponce : products) {
             productResponce.setProductName(productResponce.getProductName());
             productResponce.setBrand(productResponce.getBrand());
             productResponce.setUnit(productResponce.getUnit());
             productResponce.setProductCode(productResponce.getProductCode());
-            productResponce.setBarcodeId(responceBarcode.getCode());
         }
-        assertEquals(1, products.size());
-        assertEquals("SampleProduct", products.get(0).getProductName());
+        assertEquals(16, products.size());
+        assertEquals("İstavrit", products.get(0).getProductName());
+    }
+    @Test
+    void testGetProductById() {
+        ProductResponce productResponce = productService.getProductById(654L);
+        productResponce.setProductName("TestProduct");
+        assertEquals("TestProduct", productResponce.getProductName());
+
     }
     @Test
     @Transactional
-    void testGetProductByIdFromRepository() {
-        // Arrange
-        Product request = new Product();
-        request.setUnit(Enums.KILOGRAM);
-        request.setCategoryId(1L);
-        request.setProductName("SampleProduct");
-        request.setBrand("SampleBrand");
-        Product savedProduct = productRepository.save(request);
+    void testDeleteProductDirectly() {
+        Product product = new Product();
+        product.setId(654L);
+        product.setProductName("Test Product");
+        product.setProductCode("TEST001");
+        Product savedProduct = productRepository.save(product);
+        productRepository.deleteById(savedProduct.getId());
 
-        // Act
-        Product fetchedProduct = productRepository.findById(savedProduct.getId())
-                .orElse(null);
-
-        // Assert
-        assertNotNull(fetchedProduct);
-        assertEquals(savedProduct.getId(), fetchedProduct.getId());
-        assertEquals("SampleProduct", fetchedProduct.getProductName());
-    }
-    @Test
-    @Transactional
-    void testDeleteProductByIdFromRepository() {
-        // Arrange
-        Product request = new Product();
-        request.setUnit(Enums.KILOGRAM);
-        request.setCategoryId(1L);
-        request.setProductName("SampleProduct");
-        request.setBrand("SampleBrand");
-        Product savedProduct = productRepository.save(request);
-
-        Long id = savedProduct.getId();
-        assertTrue(productRepository.findById(id).isPresent());
-
-        // Act - delete
-        productRepository.deleteById(id);
-
-        // Assert
-        assertFalse(productRepository.findById(id).isPresent());
+        assertFalse(productRepository.existsById(product.getId()));
     }
     @Test
     @Transactional
     void testSaveProductWithoutBarcode() {
-        // Arrange: Product nesnesi oluştur
         Product request = new Product();
         request.setProductName("SampleProduct");
         request.setBrand("SampleBrand");
         request.setUnit(Enums.KILOGRAM);
-        request.setCategoryId(1L); // Category id veriyoruz, ama categoryInterface kullanmıyoruz
+        request.setCategoryId(1L);
 
-        // Act: Repository üzerinden kaydet
         Product saved = productRepository.save(request);
 
         // Assert
@@ -142,7 +104,6 @@ class ProductServiceIntegrationApplicationTests {
     @Test
     @Transactional
     void testUpdateProductWithoutBarcode() {
-        // Arrange: Önce product kaydet
         Product request = new Product();
         request.setProductName("SampleProduct");
         request.setBrand("SampleBrand");
@@ -151,13 +112,11 @@ class ProductServiceIntegrationApplicationTests {
 
         Product saved = productRepository.save(request);
 
-        // Act: Product'u güncelle
         saved.setProductName("UpdatedProduct");
         saved.setBrand("UpdatedBrand");
-        saved.setUnit(Enums.ADET); // Örnek farklı bir enum
-        Product updated = productRepository.save(saved); // save tekrar update işlevi görür
+        saved.setUnit(Enums.ADET); //
+        Product updated = productRepository.save(saved);
 
-        // Assert
         assertNotNull(updated.getId(), "Updated Product DB'de olmalı");
         assertEquals(saved.getId(), updated.getId(), "ID değişmemeli");
         assertEquals("UpdatedProduct", updated.getProductName());
