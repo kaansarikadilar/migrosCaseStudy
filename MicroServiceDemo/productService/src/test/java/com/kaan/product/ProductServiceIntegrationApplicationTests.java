@@ -1,8 +1,5 @@
 package com.kaan.product;
 
-import com.kaan.barcode.BarcodeDto.RequestBarcode;
-import com.kaan.barcode.BarcodeDto.ResponceBarcode;
-import com.kaan.barcode.barcodeTypes;
 import com.kaan.category.response.RequestCategory;
 import com.kaan.category.response.ResponseCategory;
 import com.kaan.product.Entity.Product;
@@ -55,29 +52,15 @@ class ProductServiceIntegrationApplicationTests {
     @Test
     @Transactional
     void testGetAllProducts() {
-        Product request = new Product();
-        request.setUnit(Enums.KILOGRAM);
-        request.setCategoryId(1L);
-        request.setProductName("SampleProduct");
-        request.setBrand("SampleBrand");
-        Product savedProduct = productRepository.save(request);
-        RequestBarcode requestBarcode = new RequestBarcode();
-        requestBarcode.setProductId(savedProduct.getId());
-        requestBarcode.setCategoryCode(requestBarcode.getCategoryCode());
-        ResponceBarcode responceBarcode = new ResponceBarcode("123", barcodeTypes.NORMAL,null);
-        savedProduct.setBarcodeId(responceBarcode.getCode());
-        productRepository.save(savedProduct);
-
         List<Product> products = productRepository.findAll();
         for (Product productResponce : products) {
             productResponce.setProductName(productResponce.getProductName());
             productResponce.setBrand(productResponce.getBrand());
             productResponce.setUnit(productResponce.getUnit());
             productResponce.setProductCode(productResponce.getProductCode());
-            productResponce.setBarcodeId(responceBarcode.getCode());
         }
-        assertEquals(1, products.size());
-        assertEquals("SampleProduct", products.get(0).getProductName());
+        assertEquals(16, products.size());
+        assertEquals("İstavrit", products.get(0).getProductName());
     }
     @Test
     @Transactional

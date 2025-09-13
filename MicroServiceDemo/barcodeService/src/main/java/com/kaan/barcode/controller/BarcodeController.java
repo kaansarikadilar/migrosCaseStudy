@@ -2,8 +2,8 @@ package com.kaan.barcode.controller;
 
 import com.kaan.barcode.BarcodeDto.RequestBarcode;
 import com.kaan.barcode.BarcodeDto.ResponceBarcode;
-import com.kaan.barcode.entity.Barcode;
 import com.kaan.barcode.service.IBarcodeService;
+import com.kaan.product.ProductResponce.BarcodeResponce;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,17 +16,17 @@ public class BarcodeController {
     private final IBarcodeService barcodeService;
 
     @GetMapping(path = "/list")
-    public List<Barcode> getAllBarcodes() {
+    public List<ResponceBarcode> getAllBarcodes() {
         return barcodeService.getAllBarcodes();
     }
 
     @GetMapping(path = "/list/{id}")
-    public Barcode getBarcodeById(@PathVariable(name = "id") Long id) {
+    public ResponceBarcode getBarcodeById(@PathVariable(name = "id") Long id) {
         return barcodeService.getBarcodeById(id);
     }
 
-    @GetMapping(path = "/list/{Code}")
-    public Barcode getBarcodeByCode(@PathVariable(name = "Code") String Code) {
+    @GetMapping(path = "/listt/{Code}")//kullanılmayan metod path listt olarak değiştirildi
+    public ResponceBarcode getBarcodeByCode(@PathVariable(name = "Code") String Code) {
         return barcodeService.getBarcodeByCode(Code);
     }
 
@@ -41,7 +41,7 @@ public class BarcodeController {
     }
 
     @GetMapping("/findByProduct/{productId}")
-    Barcode findByProductId(@PathVariable("productId") Long productId) {
+    BarcodeResponce findByProductId(@PathVariable("productId") Long productId) {
         return barcodeService.findByProductId(productId);
     }
 
@@ -56,12 +56,12 @@ public class BarcodeController {
     }
 
     @PostMapping(path = "/save")
-    public RequestBarcode saveBarcode(@RequestBody RequestBarcode barcodeRequest) {
+    public ResponceBarcode saveBarcode(@RequestBody RequestBarcode barcodeRequest) {
         return barcodeService.saveBarcode(barcodeRequest);
     }
 
     @PostMapping(path = "/update/{id}")
-    public ResponceBarcode updateBarcode(@PathVariable(name = "id") Long id,@RequestBody RequestBarcode request) {
+    public ResponceBarcode updateBarcode(@PathVariable(name = "id") Long id, @RequestBody RequestBarcode request) {
         return barcodeService.updateBarcode(id,request);
     }
 

@@ -1,7 +1,5 @@
 //package com.kaan.product;
 //
-//
-//
 //import com.kaan.category.response.ResponseCategory;
 //import com.kaan.product.Entity.Product;
 //import com.kaan.product.Feign.CategoryInterface;

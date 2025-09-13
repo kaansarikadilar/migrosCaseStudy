@@ -2,16 +2,17 @@ package com.kaan.product.Service.Impl;
 
 import com.kaan.barcode.BarcodeDto.RequestBarcode;
 import com.kaan.barcode.BarcodeDto.ResponceBarcode;
-import com.kaan.barcode.entity.Barcode;
 import com.kaan.category.exeption.BaseException;
 import com.kaan.category.exeption.ErrorMessage;
 import com.kaan.category.exeption.messageType;
 import com.kaan.category.response.ResponseCategory;
 import com.kaan.product.Entity.Product;
 import com.kaan.product.Feign.BarcodeInterface;
-import com.kaan.product.Mapper.BarcodeToResponce;
+import com.kaan.product.Mapper.BarcodeResponceToProductResponce;
+import com.kaan.product.Mapper.ResponceBarcodeToProductResponce;
 import com.kaan.product.Mapper.ProductRequestToProduct;
 import com.kaan.product.Mapper.ProductToProductResponse;
+import com.kaan.product.ProductResponce.BarcodeResponce;
 import com.kaan.product.ProductResponce.ProductRequest;
 import com.kaan.product.ProductResponce.ProductResponce;
 import com.kaan.product.Repository.ProductRepository;
@@ -56,8 +57,8 @@ public class ProductServiceImpl implements IProductService {
 
             ProductResponce productResponce = new ProductResponce();
             new ProductToProductResponse(product,productResponce);
-            Barcode barcodeOptional = barcodeInterface.findByProductId(product.getId());
-            new BarcodeToResponce(barcodeOptional,productResponce);
+            BarcodeResponce barcodeOptional = barcodeInterface.findByProductId(product.getId());
+            new BarcodeResponceToProductResponce(barcodeOptional,productResponce);
             return productResponce;
         }
         catch (FeignException e) {
@@ -90,7 +91,7 @@ public class ProductServiceImpl implements IProductService {
             requestBarcode.setProductId(product.getId());
             requestBarcode.setCategoryCode(responseCategory.getCategoryCode());
 
-            Barcode existingBarcode = barcodeInterface.findByProductId(product.getId());
+            BarcodeResponce existingBarcode = barcodeInterface.findByProductId(product.getId());
             if (existingBarcode != null) {
                 BeanUtils.copyProperties(existingBarcode, requestBarcode);
             }
@@ -103,8 +104,8 @@ public class ProductServiceImpl implements IProductService {
 
             ProductResponce productResponce = new ProductResponce();//response dönüştürme
             new ProductToProductResponse(savedProduct,productResponce);
-            new BarcodeToResponce(barcodeInterface.findByProductId(product.getId()), productResponce);
-
+            BarcodeResponce r1 = barcodeInterface.findByProductId(product.getId());
+            new BarcodeResponceToProductResponce(r1,productResponce);
             return productResponce;
         }
         catch (FeignException e) {
@@ -120,7 +121,7 @@ public class ProductServiceImpl implements IProductService {
     @Override//paging ile sayfa sayfa data vermek çok daha verimli
     public List<ProductResponce> getAllProducts() {
         List<Product> productOptional = productRepository.findAll();
-        List<Barcode> barcodeOptional = barcodeInterface.getAllBarcodes();
+        List<ResponceBarcode> barcodeOptional = barcodeInterface.getAllBarcodes();
         List<ProductResponce> productResponceList = new ArrayList<>();
 
         if (productOptional.isEmpty()) {
@@ -129,9 +130,9 @@ public class ProductServiceImpl implements IProductService {
         for (Product product : productOptional) {
             ProductResponce productResponce = new ProductResponce();
             new ProductToProductResponse(product, productResponce);
-            for (Barcode barcode : barcodeOptional) {//tek for a dönüştürülebilir
+            for (ResponceBarcode barcode : barcodeOptional) {//tek for a dönüştürülebilir
                 if (barcode.getCode().equals(product.getBarcodeId())) {
-                    new BarcodeToResponce(barcode,productResponce);
+                    new ResponceBarcodeToProductResponce(barcode, productResponce);
                     break;}}
             productResponceList.add(productResponce);
         }
@@ -145,12 +146,12 @@ public class ProductServiceImpl implements IProductService {
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
 
-            Barcode barcodeOptional = barcodeInterface.findByProductId(product.getId());
+            BarcodeResponce barcodeOptional = barcodeInterface.findByProductId(product.getId());
             if (barcodeOptional == null) {
-                barcodeOptional = new Barcode();
+                barcodeOptional = new BarcodeResponce();
             }
             new ProductToProductResponse(product,productResponce);//product to productResponse
-            new BarcodeToResponce(barcodeOptional,productResponce);//barcode to productResponse
+            new BarcodeResponceToProductResponce(barcodeOptional,productResponce);//barcodeResponce to responce
         }
         if(productOptional.isEmpty()){
             throw new BaseException(new ErrorMessage(messageType.NO_RECORD_EXIST,id.toString()));
@@ -162,7 +163,7 @@ public class ProductServiceImpl implements IProductService {
         Optional<Product> productOptional = productRepository.findById(id);
         if (productOptional.isPresent()) {
             Product product = productOptional.get();
-            Barcode barcode = barcodeInterface.findByProductId(product.getId());
+            BarcodeResponce barcode = barcodeInterface.findByProductId(product.getId());
             if (barcode != null) {
                 barcodeInterface.deleteBarcodeById(barcode.getId());
             }
